@@ -1,0 +1,27 @@
+{
+  "name": "my-blog",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": "18.12.1"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.1",
+    "chrono-node": "^2.5.0",
+    "csv-parse": "^5.3.3",
+    "csv-parser": "^3.0.0",
+    "dotenv": "^16.0.3",
+    "ejs": "^3.1.8",
+    "express": "^4.18.2",
+    "fs": "^0.0.1-security",
+    "lodash": "^4.17.21",
+    "mongoose": "^6.8.3"
+  }
+}

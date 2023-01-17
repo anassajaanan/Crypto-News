@@ -1,0 +1,50 @@
+<%- include('partials/header') -%>
+
+<!-- content
+================================================== -->
+<section class="s-content s-content--single">
+    <div class="row">
+        <div class="column large-12">
+
+            <article class="s-post entry format-standard">
+
+                <div class="s-content__primary">
+
+                    <h2 class="s-content__title s-content__title--post" style="text-align: left"><%= post.title%></h2>
+
+                    <ul class="s-content__post-meta">
+                        <li class="date"><%= post.date%></li>
+                    </ul>
+
+                    <div class="s-content__media">
+                        <div class="s-content__post-thumb" style="text-align: center; margin-top: -7rem; margin-bottom: -6rem">
+                            <img src="<%= post.image1080%>"
+                                 srcset="<%= post.image1080%> 2100w,
+                                         <%= post.image1080%> 1050w,
+                                         <%= post.image1080%> 525w" sizes="(max-width: 2100px) 100vw, 2100px" alt="">
+                        </div>
+                    </div> <!-- end s-content__media -->
+
+                    <p class="lead">
+                        <%= post.description%>
+                    </p>
+
+                    <% post.content.forEach((paragraph) => { %>
+                        <p>
+                            <%= paragraph%>
+                        </p>
+                    <% }); %>
+
+
+                </div> <!-- end s-content__primary -->
+            </article>
+
+        </div> <!-- end column -->
+    </div> <!-- end row -->
+
+
+</section> <!-- end s-content -->
+
+
+
+<%- include('partials/footer') -%>
