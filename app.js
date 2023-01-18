@@ -50,6 +50,15 @@ const nytSchema = new mongoose.Schema({
     description: String,
     content: Array
 });
+const bbcSchema = new mongoose.Schema({
+    title: String,
+    imageUrl: String,
+    author: String,
+    date: String,
+    type: String,
+    description: String,
+    content: Array
+});
 
 const newsWsjSchema = new mongoose.Schema({
     name: String,
@@ -68,13 +77,19 @@ const newsNytSchema = new mongoose.Schema({
     posts: [nytSchema]
 });
 
+const newsBbcSchema = new mongoose.Schema({
+    name: String,
+    posts: [bbcSchema]
+});
+
 const News = mongoose.model('News', newsWsjSchema);
 const NewsReuter = mongoose.model('NewsReuter', newsReutersSchema);
 const NewsBloomberg = mongoose.model('NewsBloomberg', newsBloombergSchema);
 const NewsNyt = mongoose.model('NewsNyt', newsNytSchema);
+const NewsBbc = mongoose.model('NewsBbc', newsBbcSchema);
 
-const nyt = new NewsNyt({
-    name: "NYT",
+const newbbc = new NewsBbc({
+    name: "BBC",
     posts: []
 });
 
@@ -121,6 +136,16 @@ app.get("/NewYorkTimes", (req, res) => {
             console.log(err);
         } else {
             res.render('nyt', {posts: foundNews.posts, stop: 15});
+        }
+    });
+});
+
+app.get('/bbc', (req, res) => {
+    NewsBbc.findOne({name: "BBC"}, (err, foundNews) => {
+        if (err) {
+            console.log(err);
+        } else {
+            res.render('bbc', {posts: foundNews.posts, stop: 15});
         }
     });
 });
@@ -191,6 +216,22 @@ app.get('/news/NewYorkTimes/:postId', (req, res) => {
     });
 });
 
+app.get('/news/bbc/:postId', (req, res) => {
+    let requestedPostId = req.params.postId;
+    requestedPostId = requestedPostId.split("&&")[1];
+    NewsBbc.findOne({name: "BBC"}, (err, foundNews) => {
+        if (err) {
+            console.log(err);
+        } else {
+            foundNews.posts.forEach(post => {
+                if (post._id == requestedPostId) {
+                    res.render('bbc-post', {post: post});
+                }
+            });
+        }
+    });
+});
+
 
 //======================Load More====================//
 app.get('/wsj/:page', (req, res) => {
@@ -253,6 +294,22 @@ app.get('/nyt/:page', (req, res) => {
                 stop = posts.length;
             }
             res.render('nyt', {posts: posts, stop: stop});
+        }
+    });
+});
+
+app.get('/bbc/:page', (req, res) => {
+    let stop = +req.params.page.split("=")[1];
+    stop *= 10;
+    NewsBbc.findOne({name: "BBC"}, (err, foundNews) => {
+        if (err) {
+            console.log(err);
+        } else {
+            const posts = foundNews.posts;
+            if (stop > posts.length) {
+                stop = posts.length;
+            }
+            res.render('bbc', {posts: posts, stop: stop});
         }
     });
 });
