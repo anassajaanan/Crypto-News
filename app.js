@@ -42,6 +42,14 @@ const bloombergSchema = new mongoose.Schema({
     date: String,
     content: Array
 });
+const nytSchema = new mongoose.Schema({
+    title: String,
+    imageUrl: String,
+    author: String,
+    date: String,
+    description: String,
+    content: Array
+});
 
 const newsWsjSchema = new mongoose.Schema({
     name: String,
@@ -55,17 +63,20 @@ const newsBloombergSchema = new mongoose.Schema({
     name: String,
     posts: [bloombergSchema]
 });
+const newsNytSchema = new mongoose.Schema({
+    name: String,
+    posts: [nytSchema]
+});
 
 const News = mongoose.model('News', newsWsjSchema);
 const NewsReuter = mongoose.model('NewsReuter', newsReutersSchema);
 const NewsBloomberg = mongoose.model('NewsBloomberg', newsBloombergSchema);
+const NewsNyt = mongoose.model('NewsNyt', newsNytSchema);
 
-const newsbloomberg = new NewsBloomberg({
-    name: 'BLOOMBERG',
+const nyt = new NewsNyt({
+    name: "NYT",
     posts: []
 });
-
-// newsbloomberg.save();
 
 
 
@@ -100,6 +111,16 @@ app.get("/bloomberg", (req, res) => {
                 stop = foundNews.posts.length;
             }
             res.render('bloomberg', {posts: foundNews.posts, stop: stop});
+        }
+    });
+});
+
+app.get("/NewYorkTimes", (req, res) => {
+    NewsNyt.findOne({name: "NYT"}, (err, foundNews) => {
+        if (err) {
+            console.log(err);
+        } else {
+            res.render('nyt', {posts: foundNews.posts, stop: 15});
         }
     });
 });
@@ -154,6 +175,22 @@ app.get('/news/bloomberg/:postId', (req, res) => {
     });
 });
 
+app.get('/news/NewYorkTimes/:postId', (req, res) => {
+    let requestedPostId = req.params.postId;
+    requestedPostId = requestedPostId.split("&&")[1];
+    NewsNyt.findOne({name: "NYT"}, (err, foundNews) => {
+        if (err) {
+            console.log(err);
+        } else {
+            foundNews.posts.forEach(post => {
+                if (post._id == requestedPostId) {
+                    res.render('nyt-post', {post: post});
+                }
+            });
+        }
+    });
+});
+
 
 //======================Load More====================//
 app.get('/wsj/:page', (req, res) => {
@@ -200,6 +237,22 @@ app.get("/bloomberg/:page", (req, res) => {
                 stop = posts.length;
             }
             res.render('bloomberg', {posts: posts, stop: stop});
+        }
+    });
+});
+
+app.get('/nyt/:page', (req, res) => {
+    let stop = +req.params.page.split("=")[1];
+    stop *= 10;
+    NewsNyt.findOne({name: "NYT"}, (err, foundNews) => {
+        if (err) {
+            console.log(err);
+        } else {
+            const posts = foundNews.posts;
+            if (stop > posts.length) {
+                stop = posts.length;
+            }
+            res.render('nyt', {posts: posts, stop: stop});
         }
     });
 });
