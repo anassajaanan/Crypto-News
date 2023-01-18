@@ -58,14 +58,15 @@
             <h2 class="s-header__nav-heading h6">Site Navigation</h2>
 
             <ul class="s-header__nav">
-                <li class="current"><a href="/" title="">Home</a></li>
-                <li class="has-children">
-                    <a href="#0" title="">Categories</a>
+                <li id="home" class="current"><a href="/" title="">Home</a></li>
+                <li id="categories" class="has-children">
+                    <a id="categoryName" href="#0" title="">Categories</a>
                     <ul class="sub-menu">
-                        <li><a href="/reuters">Reuters</a></li>
+                        <li id="reuters"><a href="/reuters">Reuters</a></li>
+                        <li id="bloomberg"><a href="/bloomberg">Bloomberg</a></li>
                         <li><a href="category.html">NY TIMES</a></li>
                         <li><a href="category.html">BBC</a></li>
-                        <li><a href="category.html">Bloomberg</a></li>
+
 
                         <li><a href="category.html">Economist</a></li>
                         <li><a href="category.html">Market Watch</a></li>
@@ -103,7 +104,7 @@
                 <input type="submit" class="s-header__search-submit" value="Search">
             </form>
 
-            <a href="#0" title="Close Search" class="s-header__overlay-close">Close</a>
+            <a href="#" title="Close Search" class="s-header__overlay-close">Close</a>
 
         </div> <!-- end search wrap -->
 

@@ -2,10 +2,6 @@ const express = require('express');
 const ejs = require('ejs');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const fs = require('fs');
-const createCsvParser = require('csv-parser');
-const parser = createCsvParser();
-const chrono = require('chrono-node');
 require('dotenv').config();
 
 const app = express();
@@ -39,6 +35,14 @@ const reutersSchema = new mongoose.Schema({
     description: String,
     content: Array
 });
+const bloombergSchema = new mongoose.Schema({
+    title: String,
+    imageUrl: String,
+    author: String,
+    date: String,
+    content: Array
+});
+
 const newsWsjSchema = new mongoose.Schema({
     name: String,
     posts: [wsjSchema]
@@ -47,21 +51,25 @@ const newsReutersSchema = new mongoose.Schema({
     name: String,
     posts: [reutersSchema]
 });
+const newsBloombergSchema = new mongoose.Schema({
+    name: String,
+    posts: [bloombergSchema]
+});
 
 const News = mongoose.model('News', newsWsjSchema);
 const NewsReuter = mongoose.model('NewsReuter', newsReutersSchema);
+const NewsBloomberg = mongoose.model('NewsBloomberg', newsBloombergSchema);
 
-const newsreuters = new NewsReuter({
-    name: 'REUTERS',
+const newsbloomberg = new NewsBloomberg({
+    name: 'BLOOMBERG',
     posts: []
 });
 
-// newsreuters.save();
+// newsbloomberg.save();
 
 
 
-
-
+// ================= ALL NEWS =================
 app.get('/', (req, res) => {
     News.findOne({name: "WSJ"}, (err, foundNews) => {
         if (err) {
@@ -82,8 +90,22 @@ app.get('/reuters', (req, res) => {
     });
 });
 
+app.get("/bloomberg", (req, res) => {
+    NewsBloomberg.findOne({name: "BLOOMBERG"}, (err, foundNews) => {
+        if (err) {
+            console.log(err);
+        } else {
+            let stop = 15;
+            if (stop > foundNews.posts.length) {
+                stop = foundNews.posts.length;
+            }
+            res.render('bloomberg', {posts: foundNews.posts, stop: stop});
+        }
+    });
+});
 
 
+// ================= Single Post =================//
 app.get('/news/wsj/:postId', (req, res) => {
     let requestedPostId = req.params.postId;
     requestedPostId = requestedPostId.split("&&")[1];
@@ -116,6 +138,24 @@ app.get('/news/reuters/:postId', (req, res) => {
     });
 });
 
+app.get('/news/bloomberg/:postId', (req, res) => {
+    let requestedPostId = req.params.postId;
+    requestedPostId = requestedPostId.split("&&")[1];
+    NewsBloomberg.findOne({name: "BLOOMBERG"}, (err, foundNews) => {
+        if (err) {
+            console.log(err);
+        } else {
+            foundNews.posts.forEach(post => {
+                if (post._id == requestedPostId) {
+                    res.render('bloomberg-post', {post: post});
+                }
+            });
+        }
+    });
+});
+
+
+//======================Load More====================//
 app.get('/wsj/:page', (req, res) => {
     let stop = +req.params.page.split("=")[1];
     stop *= 10;
@@ -148,80 +188,10 @@ app.get('/reuters/:page', (req, res) => {
     });
 });
 
-
-
-
-
-app.get('/push/wsj', (req, res) => {
-    let posts = [];
-    fs.createReadStream(__dirname + '/public/backend/data/cryptocurrency.csv')
-        .pipe(parser)
-        .on('data', (data) => {
-            const paragraphs = data.content.split("\n");
-            // console.log(paragraphs);
-            const newPost = {
-                title: data.title,
-                imageUrl: data.imageUrl.replace("width=220&height=147", ""),
-                author: data.author,
-                date: chrono.parse(data.date)[0].start.date().toLocaleDateString("en-US", {month: "short", day: "numeric", year: "numeric"}),
-                description: data.description,
-                content: paragraphs
-            }
-            posts.push(newPost);
-
-        })
-        .on('end', () => {
-            console.log('Finished reading CSV file');
-            News.updateOne({name: "WSJ"}, {$push: {posts: { $each: posts, $position: 0 }}}, (err) => {
-                if (err) {
-                    console.log(err);
-                } else {
-                    console.log("Successfully added posts to the database");
-                    res.redirect('/');
-                }
-            });
-        });
-    res.redirect('/');
-});
-
-
-app.get("/push/reuters", (req, res) => {
-    let posts = [];
-    fs.createReadStream(__dirname + '/public/backend/data/future-of-money.csv')
-        .pipe(parser)
-        .on('data', (data) => {
-            const paragraphs = data.content.split("\n");
-            const newPost = {
-                title: data.title,
-                image1080: data.image1080,
-                image480: data.image480,
-                date: data.date,
-                description: data.description,
-                content: paragraphs
-            }
-            console.log(newPost);
-            posts.push(newPost);
-
-        })
-        .on('end', () => {
-            console.log('Finished reading CSV file');
-            NewsReuter.updateOne({name: "REUTERS"}, {$push: {posts: { $each: posts, $position: 0 }}}, (err) => {
-                if (err) {
-                    console.log(err);
-                } else {
-                    console.log("Successfully added posts to the database");
-                    res.redirect('/reuters');
-                }
-            });
-        });
-});
-
-
-
-app.get('/wsj', (req, res) => {
-    let stop = +req.query.page;
+app.get("/bloomberg/:page", (req, res) => {
+    let stop = +req.params.page.split("=")[1];
     stop *= 10;
-    News.findOne({name: "WSJ"}, (err, foundNews) => {
+    NewsBloomberg.findOne({name: "BLOOMBERG"}, (err, foundNews) => {
         if (err) {
             console.log(err);
         } else {
@@ -229,10 +199,13 @@ app.get('/wsj', (req, res) => {
             if (stop > posts.length) {
                 stop = posts.length;
             }
-            res.render('wsj', {posts: posts, stop: stop});
+            res.render('bloomberg', {posts: posts, stop: stop});
         }
     });
 });
+
+
+
 
 
 
