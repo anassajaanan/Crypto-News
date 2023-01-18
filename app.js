@@ -59,6 +59,14 @@ const bbcSchema = new mongoose.Schema({
     description: String,
     content: Array
 });
+const ftSchema = new mongoose.Schema({
+    title: String,
+    imageUrl: String,
+    author: String,
+    date: String,
+    description: String,
+    content: Array
+})
 
 const newsWsjSchema = new mongoose.Schema({
     name: String,
@@ -82,14 +90,20 @@ const newsBbcSchema = new mongoose.Schema({
     posts: [bbcSchema]
 });
 
+const newsFtSchema = new mongoose.Schema({
+    name: String,
+    posts: [ftSchema]
+});
+
 const News = mongoose.model('News', newsWsjSchema);
 const NewsReuter = mongoose.model('NewsReuter', newsReutersSchema);
 const NewsBloomberg = mongoose.model('NewsBloomberg', newsBloombergSchema);
 const NewsNyt = mongoose.model('NewsNyt', newsNytSchema);
 const NewsBbc = mongoose.model('NewsBbc', newsBbcSchema);
+const NewsFt = mongoose.model('NewsFt', newsFtSchema);
 
-const newbbc = new NewsBbc({
-    name: "BBC",
+const newft = new NewsFt({
+    name: "FT",
     posts: []
 });
 
@@ -146,6 +160,15 @@ app.get('/bbc', (req, res) => {
             console.log(err);
         } else {
             res.render('bbc', {posts: foundNews.posts, stop: 15});
+        }
+    });
+});
+app.get('/ft', (req, res) => {
+    NewsFt.findOne({name: "FT"}, (err, foundNews) => {
+        if (err) {
+            console.log(err);
+        } else {
+            res.render('ft', {posts: foundNews.posts, stop: 15});
         }
     });
 });
@@ -232,6 +255,22 @@ app.get('/news/bbc/:postId', (req, res) => {
     });
 });
 
+app.get('/news/ft/:postId', (req, res) => {
+    let requestedPostId = req.params.postId;
+    requestedPostId = requestedPostId.split("&&")[1];
+    NewsFt.findOne({name: "FT"}, (err, foundNews) => {
+        if (err) {
+            console.log(err);
+        } else {
+            foundNews.posts.forEach(post => {
+                if (post._id == requestedPostId) {
+                    res.render('ft-post', {post: post});
+                }
+            });
+        }
+    });
+});
+
 
 //======================Load More====================//
 app.get('/wsj/:page', (req, res) => {
@@ -310,6 +349,22 @@ app.get('/bbc/:page', (req, res) => {
                 stop = posts.length;
             }
             res.render('bbc', {posts: posts, stop: stop});
+        }
+    });
+});
+
+app.get('/ft/:page', (req, res) => {
+    let stop = +req.params.page.split("=")[1];
+    stop *= 10;
+    NewsFt.findOne({name: "FT"}, (err, foundNews) => {
+        if (err) {
+            console.log(err);
+        } else {
+            const posts = foundNews.posts;
+            if (stop > posts.length) {
+                stop = posts.length;
+            }
+            res.render('ft', {posts: posts, stop: stop});
         }
     });
 });
