@@ -76,6 +76,14 @@ const mwSchema = new mongoose.Schema({
     content: String
 });
 
+const forbesSchema = new mongoose.Schema({
+    title: String,
+    imageUrl: String,
+    date: String,
+    description: String,
+    content: Array
+});
+
 const newsWsjSchema = new mongoose.Schema({
     name: String,
     posts: [wsjSchema]
@@ -106,6 +114,10 @@ const newsMwSchema = new mongoose.Schema({
     name: String,
     posts: [mwSchema]
 });
+const newsForbesSchema = new mongoose.Schema({
+    name: String,
+    posts: [forbesSchema]
+});
 
 const News = mongoose.model('News', newsWsjSchema);
 const NewsReuter = mongoose.model('NewsReuter', newsReutersSchema);
@@ -114,13 +126,13 @@ const NewsNyt = mongoose.model('NewsNyt', newsNytSchema);
 const NewsBbc = mongoose.model('NewsBbc', newsBbcSchema);
 const NewsFt = mongoose.model('NewsFt', newsFtSchema);
 const NewsMw = mongoose.model('NewsMw', newsMwSchema);
+const NewsForbes = mongoose.model('NewsForbes', newsForbesSchema);
 
 
-const newmw = new NewsMw({
-    name: "MW",
+const newforbes = new NewsForbes({
+    name: 'FORBES',
     posts: []
 });
-
 
 
 
@@ -197,6 +209,20 @@ app.get('/marketwatch', (req, res) => {
         }
     });
 })
+
+app.get('/forbes', (req, res) => {
+    NewsForbes.findOne({name: "FORBES"}, (err, foundNews) => {
+        if (err) {
+            console.log(err);
+        } else {
+            let stop = 15;
+            if (stop > foundNews.posts.length) {
+                stop = foundNews.posts.length;
+            }
+            res.render('forbes', {posts: foundNews.posts, stop: stop});
+        }
+    });
+});
 
 
 // ================= Single Post =================//
@@ -306,6 +332,22 @@ app.get('/news/marketwatch/:postId', (req, res) => {
             foundNews.posts.forEach(post => {
                 if (post._id == requestedPostId) {
                     res.render('mw-post', {post: post});
+                }
+            });
+        }
+    });
+});
+
+app.get('/news/forbes/:postId', (req, res) => {
+    let requestedPostId = req.params.postId;
+    requestedPostId = requestedPostId.split("&&")[1];
+    NewsForbes.findOne({name: "FORBES"}, (err, foundNews) => {
+        if (err) {
+            console.log(err);
+        } else {
+            foundNews.posts.forEach(post => {
+                if (post._id == requestedPostId) {
+                    res.render('forbes-post', {post: post});
                 }
             });
         }
@@ -422,6 +464,22 @@ app.get('/marketwatch/:page', (req, res) => {
                 stop = posts.length;
             }
             res.render('mw', {posts: posts, stop: stop});
+        }
+    });
+});
+
+app.get('/forbes/:page', (req, res) => {
+    let stop = +req.params.page.split("=")[1];
+    stop *= 10;
+    NewsForbes.findOne({name: "FORBES"}, (err, foundNews) => {
+        if (err) {
+            console.log(err);
+        } else {
+            const posts = foundNews.posts;
+            if (stop > posts.length) {
+                stop = posts.length;
+            }
+            res.render('forbes', {posts: posts, stop: stop});
         }
     });
 });
