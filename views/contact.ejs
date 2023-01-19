@@ -1,0 +1,46 @@
+<%- include('partials/header') -%>
+
+
+<div class="row comment-respond">
+
+    <!-- START respond -->
+    <div id="respond" class="column">
+
+        <h3>
+            Get In Touch With Us.
+        </h3>
+
+        <form name="cForm" id="cForm" class="s-content__form" method="post" action="/contact" autocomplete="off" style="padding-top: 0">
+            <fieldset>
+
+                <div class="form-field">
+                    <input name="cName" type="text" id="cName" class="h-full-width" placeholder="Your Name" value=""
+                           required>
+                </div>
+
+                <div class="form-field">
+                    <input name="cEmail" type="text" id="cEmail" class="h-full-width" placeholder="Your Email" value=""
+                           required>
+                </div>
+
+
+                <div class="message form-field">
+                    <textarea name="cMessage" id="cMessage" class="h-full-width" placeholder="Your Message"
+                              required></textarea>
+                </div>
+
+                <button type="submit" class="submit btn btn--primary btn--medium h-full-width">Submit</button>
+
+            </fieldset>
+        </form> <!-- end form -->
+
+
+    </div>
+    <!-- END respond-->
+
+</div> <!-- end comment-respond -->
+
+</div> <!-- end comments-wrap -->
+
+
+<%- include('partials/footer') -%>

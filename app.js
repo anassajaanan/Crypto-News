@@ -9,7 +9,7 @@ const port = process.env.PORT || 3000;
 
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
-app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.urlencoded({extended: true}));
 
 mongoose.set('strictQuery', true);
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -128,12 +128,12 @@ const NewsFt = mongoose.model('NewsFt', newsFtSchema);
 const NewsMw = mongoose.model('NewsMw', newsMwSchema);
 const NewsForbes = mongoose.model('NewsForbes', newsForbesSchema);
 
-
-const newforbes = new NewsForbes({
-    name: 'FORBES',
-    posts: []
-});
-
+const contactSchema = new mongoose.Schema({
+    name: String,
+    email: String,
+    message: String
+})
+const Contact = mongoose.model('Contact', contactSchema);
 
 
 // ================= ALL NEWS =================
@@ -484,47 +484,41 @@ app.get('/forbes/:page', (req, res) => {
     });
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-app.get('/compose', (req, res) => {
-    res.render('compose');
-});
-
-app.post("/", (req, res) => {
-    const newPost = {
-        title: req.body.title,
-        imageUrl: req.body.imageUrl.replace("width=220&height=147", ""),
-        author: req.body.author,
-        date: req.body.date,
-        description: req.body.description,
-        content: req.body.content
-    }
-    News.updateOne({name: "WSJ"}, {$push: {posts: { $each: [newPost], $position: 0 }}}, (err) => {
+// ===================Contact Us=====================//
+app.get('/contact', (req, res) => {
+    res.render('contact')
+})
+app.post('/contact', (req, res) => {
+    const newContact = new Contact({
+        name: req.body.cName,
+        email: req.body.cEmail,
+        message: req.body.cMessage
+    });
+    newContact.save().then((err) => {
         if (err) {
             console.log(err);
         } else {
-            console.log("Successfully added a new wsj post to the database");
-            res.redirect('/');
+            console.log("Contact saved");
         }
     });
+    res.redirect('/');
 });
+
+// ===================Footer=====================//
+app.get('/terms-and-conditions', (req, res) => {
+    res.sendFile(__dirname + "/public/terms-and-conditions.html");
+});
+app.get('/about-us', (req, res) => {
+    res.sendFile(__dirname + "/public/about-us.html");
+});
+app.get('/privacy-policy', (req, res) => {
+    res.sendFile(__dirname + "/public/privacy-policy.html");
+});
+
+app.get('/disclaimer', (req, res) => {
+    res.sendFile(__dirname + "/public/disclaimer.html");
+});
+
 
 app.listen(port, () => {
     console.log('Server started on port 3000');
