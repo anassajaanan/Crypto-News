@@ -67,6 +67,14 @@ const ftSchema = new mongoose.Schema({
     description: String,
     content: Array
 })
+const mwSchema = new mongoose.Schema({
+    title: String,
+    imageUrl: String,
+    author: String,
+    date: String,
+    description: String,
+    content: String
+});
 
 const newsWsjSchema = new mongoose.Schema({
     name: String,
@@ -94,6 +102,10 @@ const newsFtSchema = new mongoose.Schema({
     name: String,
     posts: [ftSchema]
 });
+const newsMwSchema = new mongoose.Schema({
+    name: String,
+    posts: [mwSchema]
+});
 
 const News = mongoose.model('News', newsWsjSchema);
 const NewsReuter = mongoose.model('NewsReuter', newsReutersSchema);
@@ -101,11 +113,14 @@ const NewsBloomberg = mongoose.model('NewsBloomberg', newsBloombergSchema);
 const NewsNyt = mongoose.model('NewsNyt', newsNytSchema);
 const NewsBbc = mongoose.model('NewsBbc', newsBbcSchema);
 const NewsFt = mongoose.model('NewsFt', newsFtSchema);
+const NewsMw = mongoose.model('NewsMw', newsMwSchema);
 
-const newft = new NewsFt({
-    name: "FT",
+
+const newmw = new NewsMw({
+    name: "MW",
     posts: []
 });
+
 
 
 
@@ -172,6 +187,16 @@ app.get('/ft', (req, res) => {
         }
     });
 });
+
+app.get('/marketwatch', (req, res) => {
+    NewsMw.findOne({name: "MW"}, (err, foundNews) => {
+        if (err) {
+            console.log(err);
+        } else {
+            res.render('mw', {posts: foundNews.posts, stop: 15});
+        }
+    });
+})
 
 
 // ================= Single Post =================//
@@ -265,6 +290,22 @@ app.get('/news/ft/:postId', (req, res) => {
             foundNews.posts.forEach(post => {
                 if (post._id == requestedPostId) {
                     res.render('ft-post', {post: post});
+                }
+            });
+        }
+    });
+});
+
+app.get('/news/marketwatch/:postId', (req, res) => {
+    let requestedPostId = req.params.postId;
+    requestedPostId = requestedPostId.split("&&")[1];
+    NewsMw.findOne({name: "MW"}, (err, foundNews) => {
+        if (err) {
+            console.log(err);
+        } else {
+            foundNews.posts.forEach(post => {
+                if (post._id == requestedPostId) {
+                    res.render('mw-post', {post: post});
                 }
             });
         }
@@ -365,6 +406,22 @@ app.get('/ft/:page', (req, res) => {
                 stop = posts.length;
             }
             res.render('ft', {posts: posts, stop: stop});
+        }
+    });
+});
+
+app.get('/marketwatch/:page', (req, res) => {
+    let stop = +req.params.page.split("=")[1];
+    stop *= 10;
+    NewsMw.findOne({name: "MW"}, (err, foundNews) => {
+        if (err) {
+            console.log(err);
+        } else {
+            const posts = foundNews.posts;
+            if (stop > posts.length) {
+                stop = posts.length;
+            }
+            res.render('mw', {posts: posts, stop: stop});
         }
     });
 });
